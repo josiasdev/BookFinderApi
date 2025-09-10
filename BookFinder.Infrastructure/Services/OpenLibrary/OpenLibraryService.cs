@@ -1,6 +1,6 @@
 using BookFinder.Infrastructure.Services.Models;
 using System.Net.Http.Json;
-namespace BookFinder.Infrastructure.Services;
+namespace BookFinder.Infrastructure.Services.OpenLibrary;
 
 public class OpenLibraryService : IOpenLibraryService
 {

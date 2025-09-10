@@ -1,5 +1,5 @@
 using BookFinder.Infrastructure.Services.Models;
-namespace BookFinder.Infrastructure.Services;
+namespace BookFinder.Infrastructure.Services.OpenLibrary;
 
 public interface IOpenLibraryService
 {
