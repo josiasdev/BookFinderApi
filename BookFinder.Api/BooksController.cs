@@ -1,23 +1,22 @@
 using BookFinder.Domain;
 using BookFinder.Infrastructure.Data;
 using BookFinder.Infrastructure.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookFinder.Api.Controller;
+namespace BookFinder.Api.Controllers;
 
 [ApiController]
-[Route ("api/[controller]")]
+[Route("api/[controller]")]
 public class BooksController : ControllerBase
 {
     private readonly IOpenLibraryService _openLibraryService;
-    private readonly ApplicationDbContext _dbContext;
+    private readonly ApplicationDbContext _context;
 
-    public BooksController(IOpenLibraryService openLibraryService, ApplicationDbContext dbContext)
+    public BooksController(IOpenLibraryService openLibraryService, ApplicationDbContext context)
     {
         _openLibraryService = openLibraryService;
-        _dbContext = dbContext;
+        _context = context;
     }
 
     /// <summary>
@@ -37,11 +36,12 @@ public class BooksController : ControllerBase
         {
             return NotFound($"No books found for author '{authorName}'.");
         }
+
         var firstBook = searchResult.Docs.First();
         var authorKey = firstBook.AuthorKey.First();
 
-        var author = await _dbContext.Authors
-            .Include(a => a.books)
+        var author = await _context.Authors
+            .Include(a => a.Books) 
             .FirstOrDefaultAsync(a => a.OpenLibraryKey == authorKey);
 
         if (author == null)
@@ -52,24 +52,25 @@ public class BooksController : ControllerBase
                 Name = firstBook.AuthorName.First(),
                 OpenLibraryKey = authorKey
             };
-            _dbContext.Authors.Add(author);
+            _context.Authors.Add(author);
         }
 
         foreach (var bookDoc in searchResult.Docs)
         {
-            var bookExists = author.books.Any(b => b.Title == bookDoc.Title);
+            var bookExists = author.Books.Any(b => b.Title == bookDoc.Title);
             if (!bookExists)
             {
-                author.books.Add(new Book
+                author.Books.Add(new Book
                 {
                     Id = Guid.NewGuid(),
                     Title = bookDoc.Title,
-                    FirstPublishYear = bookDoc.FirstPublishYear,
+                    FirstPublishYear = bookDoc.FirstPublishYear
                 });
             }
         }
 
-        await _dbContext.SaveChangesAsync();
+        await _context.SaveChangesAsync();
+
         return Ok(author);
     }
 }
