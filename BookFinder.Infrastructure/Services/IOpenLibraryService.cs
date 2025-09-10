@@ -1,0 +1,6 @@
+namespace BookFinder.Infrastructure.Services;
+
+public class IOpenLibraryService
+{
+    
+}
