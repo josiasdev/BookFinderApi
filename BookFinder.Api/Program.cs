@@ -1,4 +1,5 @@
 using BookFinder.Infrastructure.Data;
+using BookFinder.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient<IOpenLibraryService, OpenLibraryService>();
 
 var app = builder.Build();
 
