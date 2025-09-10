@@ -1,0 +1,22 @@
+services:
+  sql-server-db:
+
+    image: mcr.microsoft.com/mssql/server:2022-latest
+
+    container_name: bookfinder-sql-server
+
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=BookFinder2509
+    
+ 
+    ports:
+      - "1433:1433"
+      
+    
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+
+volumes:
+  mssql_data:
