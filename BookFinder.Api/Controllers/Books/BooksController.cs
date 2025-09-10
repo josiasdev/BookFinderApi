@@ -1,11 +1,11 @@
 using BookFinder.Domain.DTOs.Author;
 using BookFinder.Domain.DTOs.Book;
 using BookFinder.Infrastructure.Data;
-using BookFinder.Infrastructure.Services;
+using BookFinder.Infrastructure.Services.OpenLibrary;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookFinder.Api.Controllers;
+namespace BookFinder.Api.Controllers.Books;
 
 [ApiController]
 [Route("/[controller]")]
@@ -143,12 +143,11 @@ public class BooksController : ControllerBase
         return Ok(responseDto);
     }
     
-    // UPDATE (Novo)
     /// <summary>
     /// Atualiza o nome de um autor existente.
     /// </summary>
     [HttpPut("author/{id}")]
-    [ProducesResponseType(204)] // 204 No Content - Sucesso sem conteúdo de retorno
+    [ProducesResponseType(204)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateAuthor(Guid id, [FromBody] UpdateAuthorDto authorDto)
     {
@@ -159,13 +158,12 @@ public class BooksController : ControllerBase
             return NotFound();
         }
 
-        author.Name = authorDto.Name; // Atualiza a propriedade
+        author.Name = authorDto.Name; 
         await _context.SaveChangesAsync();
 
         return NoContent();
     }
-
-    // DELETE (Novo)
+    
     /// <summary>
     /// Deleta um autor e todos os seus livros associados.
     /// </summary>
@@ -181,10 +179,10 @@ public class BooksController : ControllerBase
             return NotFound();
         }
 
-        _context.Authors.Remove(author); // Marca para deleção
-        await _context.SaveChangesAsync(); // Efetiva a deleção no banco
+        _context.Authors.Remove(author);
+        await _context.SaveChangesAsync(); 
 
-        return NoContent(); // Por padrão, o EF Core deletará os livros em cascata
+        return NoContent(); 
     }
     
 }
