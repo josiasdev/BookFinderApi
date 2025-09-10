@@ -4,9 +4,12 @@ using BookFinder.Infrastructure.Data;
 using BookFinder.Infrastructure.Services.OpenLibrary;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookFinder.Api.Controllers.Books;
 
+
+[Authorize]
 [ApiController]
 [Route("/[controller]")]
 public class BooksController : ControllerBase
