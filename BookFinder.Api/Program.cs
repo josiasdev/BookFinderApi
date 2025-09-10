@@ -1,5 +1,6 @@
 using BookFinder.Infrastructure.Data;
 using BookFinder.Infrastructure.Services;
+using BookFinder.Api.Controllers;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient<IOpenLibraryService, OpenLibraryService>();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -20,5 +22,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.MapControllers();
 
 app.Run();
