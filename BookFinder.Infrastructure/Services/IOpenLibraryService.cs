@@ -1,6 +1,7 @@
+using BookFinder.Infrastructure.Services.Models;
 namespace BookFinder.Infrastructure.Services;
 
-public class IOpenLibraryService
+public interface IOpenLibraryService
 {
-    
+    Task<OpenLibrarySearchResponse> SearchBooksByAuthorAsync(string searchTerm);
 }
