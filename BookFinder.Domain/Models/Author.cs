@@ -1,4 +1,4 @@
-namespace BookFinder.Domain;
+namespace BookFinder.Domain.Models;
 
 public class Author
 {
