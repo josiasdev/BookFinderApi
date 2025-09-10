@@ -1,4 +1,5 @@
-using BookFinder.Domain.DTOs;
+using BookFinder.Domain.DTOs.Author;
+using BookFinder.Domain.DTOs.Book;
 using BookFinder.Infrastructure.Data;
 using BookFinder.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +54,7 @@ public class BooksController : ControllerBase
     /// </summary>
     /// <param name="authorName">O nome do autor a ser pesquisado.</param>
     /// <returns>O autor e sua lista de livros salvos.</returns>
-    [HttpPost("saves/{authorName}")]
+    [HttpPost("search-and-save/{authorName}")]
     [ProducesResponseType(typeof(AuthorDto), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> SearchAndSaveAuthorBooks(string authorName)
@@ -114,4 +115,76 @@ public class BooksController : ControllerBase
 
         return Ok(responseDto);
     }
+    
+    /// <summary>
+    /// Busca um autor especifico pelo seu ID.
+    /// </summary>
+    [HttpGet("author/{id}")]
+    [ProducesResponseType(typeof(AuthorDto), 200)]
+    [ProducesResponseType(404)]
+    
+    public async Task<IActionResult> GetAuthorById(Guid id)
+    {
+        var author = await _context.Authors
+            .Include(a => a.Books)
+            .FirstOrDefaultAsync(a => a.Id == id);
+
+        if (author == null)
+        {
+            return NotFound();
+        }
+
+        var responseDto = new AuthorDto
+        {
+            Id = author.Id, Name = author.Name, OpenLibraryKey = author.OpenLibraryKey,
+            Books = author.Books.Select(b => new BookDto { Id = b.Id, Title = b.Title, FirstPublishYear = b.FirstPublishYear }).ToList()
+        };
+
+        return Ok(responseDto);
+    }
+    
+    // UPDATE (Novo)
+    /// <summary>
+    /// Atualiza o nome de um autor existente.
+    /// </summary>
+    [HttpPut("author/{id}")]
+    [ProducesResponseType(204)] // 204 No Content - Sucesso sem conteúdo de retorno
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> UpdateAuthor(Guid id, [FromBody] UpdateAuthorDto authorDto)
+    {
+        var author = await _context.Authors.FindAsync(id);
+
+        if (author == null)
+        {
+            return NotFound();
+        }
+
+        author.Name = authorDto.Name; // Atualiza a propriedade
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    // DELETE (Novo)
+    /// <summary>
+    /// Deleta um autor e todos os seus livros associados.
+    /// </summary>
+    [HttpDelete("author/{id}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> DeleteAuthor(Guid id)
+    {
+        var author = await _context.Authors.FindAsync(id);
+
+        if (author == null)
+        {
+            return NotFound();
+        }
+
+        _context.Authors.Remove(author); // Marca para deleção
+        await _context.SaveChangesAsync(); // Efetiva a deleção no banco
+
+        return NoContent(); // Por padrão, o EF Core deletará os livros em cascata
+    }
+    
 }
