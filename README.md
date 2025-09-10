@@ -5,6 +5,9 @@ Esta é uma Web API em .NET 8 que busca livros por autor utilizando a Open Libra
 
 ## Como Configurar e Rodar
 1.  Clone o repositório.
+    ```bash
+    git clone https://github.com/josiasdev/BookFinderApi
+    ```
 2.  Certifique-se de ter o .NET 8 SDK instalado.
 3.  Configure a string de conexão no arquivo `BookFinder.Api/appsettings.json`. O projeto está configurado para usar o SQL Server LocalDB.
 4.  Abra o terminal na pasta `BookFinder.Api` e execute os comandos de migração do banco:
