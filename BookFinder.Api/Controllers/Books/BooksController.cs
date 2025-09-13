@@ -1,5 +1,6 @@
 using BookFinder.Domain.DTOs.Author;
 using BookFinder.Domain.DTOs.Book;
+using BookFinder.Domain.DTOs.Paginacao;
 using BookFinder.Infrastructure.Data;
 using BookFinder.Infrastructure.Services.OpenLibrary;
 using Microsoft.AspNetCore.Mvc;
@@ -24,16 +25,22 @@ public class BooksController : ControllerBase
     }
 
     /// <summary>
-    /// Busca todos os autores e seus livros que já estão salvos no banco de dados.
+    /// Busca todos os autores e seus livros de forma paginada.
     /// </summary>
-    /// <returns>Uma lista de autores com seus respectivos livros.</returns>
+    /// <param name="pageNumber">O número da página a ser retornada. O padrão é 1.</param>
+    /// <param name="pageSize">O número de itens por página. O padrão é 10.</param>
+    /// <returns>Uma lista paginada de autores com seus livros e metadados de paginação.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(List<AuthorDto>), 200)]
-    public async Task<IActionResult> GetAllAuthorsWithBooks()
+    [ProducesResponseType(typeof(PaginatedResponseDto<AuthorDto>), 200)]
+    public async Task<IActionResult> GetAllAuthorsWithBooks([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
 
+        var totalCount = await _context.Authors.CountAsync();
+        
         var authorsFromDb = await _context.Authors
             .Include(a => a.Books)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
         var authorsDto = authorsFromDb.Select(author => new AuthorDto
@@ -49,7 +56,20 @@ public class BooksController : ControllerBase
             }).ToList()
         }).ToList();
 
-        return Ok(authorsDto);
+        var paginationMetadata = new PaginationMetadata
+        {
+            TotalCount = totalCount,
+            PageSize = pageSize,
+            CurrentPage = pageNumber,
+            TotalPage = (int)Math.Ceiling(totalCount / (double)pageSize)
+        };
+        var response = new PaginatedResponseDto<AuthorDto>
+        {
+            Data = authorsDto,
+            Pagination = paginationMetadata
+        };
+        
+        return Ok(response);
     }
 
     /// <summary>
@@ -187,5 +207,72 @@ public class BooksController : ControllerBase
 
         return NoContent(); 
     }
-    
+
+    [HttpGet("count")]
+    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> GetTotalBookCount()
+    {
+        try
+        {
+            var totalBooks = await _context.Books.CountAsync();
+
+            return Ok(new { totalBooks });
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    /// <summary>
+    /// Busca na Open Library uma lista paginada de livros publicados em um ano específico.
+    /// </summary>
+    /// <param name="year">Ano de publicação para a busca.</param>
+    /// <param name="pageNumber">O número da página a ser retornada.</param>
+    /// <param name="pageSize">O número de itens por página.</param>
+    /// <returns>Uma lista paginada de livros encontrados para o ano especificado.</returns>
+    [HttpGet("/{year}")]
+    [ProducesResponseType(typeof(PaginatedResponseDto<BookByYearDto>), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetBooksByYear(
+        int year,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        var limit = pageSize;
+        var offset = (pageNumber - 1) * pageSize;
+
+        var openLibraryResponse = await _openLibraryService.GetBooksByYearAsync(year, limit, offset);
+
+        if (openLibraryResponse == null || openLibraryResponse.Works.Count == 0)
+        {
+            return NotFound($"Nenhum livro encontrado para o ano {year}.");
+        }
+
+        var booksDto = openLibraryResponse.Works.Select(work => new BookByYearDto
+        {
+            Title = work.Title,
+            PublishYear = work.FirstPublishYear,
+            Authors = work.Authors.Select(a => a.Name).ToList(),
+            OpenLibraryKey = work.Key
+        }).ToList();
+
+        var paginationMetadata = new PaginationMetadata
+        {
+            TotalCount = openLibraryResponse.WorkCount,
+            PageSize = pageSize,
+            CurrentPage = pageNumber,
+            TotalPage = (int)Math.Ceiling(openLibraryResponse.WorkCount / (double)pageSize)
+        };
+
+        var response = new PaginatedResponseDto<BookByYearDto>
+        {
+            Data = booksDto,
+            Pagination = paginationMetadata
+        };
+
+        return Ok(response);
+    }
+
 }
