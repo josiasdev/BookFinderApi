@@ -76,10 +76,6 @@ The project uses a layered architecture to separate responsibilities:
 
 Below is a list of the main available endpoints.
 
-## API Endpoints
-
-Below is a list of the main available endpoints.
-
 | HTTP Method | Endpoint | Description | Requires Authentication? |
 | :---------- | :--------------------------------------- | :------------------------------------------------------ | :------------------- |
 | `POST` | `Auth/register` | Registers a new user. | No |
