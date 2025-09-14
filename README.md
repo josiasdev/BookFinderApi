@@ -72,9 +72,9 @@ The project uses a layered architecture to separate responsibilities:
 - BookFinder.Infrastructure: Responsible for data access (DbContext) and communication with external services (integration with the Open Library API, token generation service).
 - BookFinder.Api: The presentation layer. Contains the Controllers, which expose the HTTP endpoints, and the application entry point (Program.cs).
 
-## Endpoints da API
+## API Endpoints
 
-A seguir, uma lista dos principais endpoints disponíveis.
+Below is a list of the main available endpoints.
 
 ## API Endpoints
 
