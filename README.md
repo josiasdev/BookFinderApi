@@ -1,108 +1,98 @@
 # BookFinder API
 
-## Visão Geral do Projeto
-BookFinder API é uma Web API construída com .NET 8 como parte de uma avaliação técnica para a vaga de Desenvolvedor Backend Júnior. O projeto se integra com a Open Library API para buscar informações sobre livros e autores, processa esses dados e os persiste em um banco de dados SQL Server, que é orquestrado via Docker Compose.
+## Project Overview
+BookFinder API is a Web API built with .NET 8 as part of a technical assessment for the Junior Backend Developer position. The project integrates with the Open Library API to retrieve information about books and authors, processes this data, and persists it to a SQL Server database, which is orchestrated via Docker Compose.
 
-Além da funcionalidade principal, a API implementa um sistema completo de autenticação e autorização via JWT, CRUD para os dados locais, paginação e testes unitários.
+In addition to the main functionality, the API implements a complete authentication and authorization system via JWT, CRUD for local data and pagination.
 
 ## Features
-- Integração com API de Terceiros: Busca de livros por autor e por ano de publicação na Open Library.
-- Banco de Dados com Docker: Ambiente de desenvolvimento consistente e fácil de configurar com SQL Server rodando em um container Docker.
-- Autenticação e Autorização: Sistema seguro de registro e login com JSON Web Tokens (JWT). Endpoints protegidos que exigem autenticação.
-- CRUD Completo: Operações de Criar, Ler, Atualizar e Deletar para os autores salvos no banco de dados.
-- Paginação: Os endpoints que retornam listas de dados são paginados para garantir a performance e escalabilidade da API.
-- Testes Unitários: Testes para a camada de serviço (com Moq) e para a camada de controller (com EF Core In-Memory) garantindo a qualidade e a confiabilidade do código.
-- Arquitetura Limpa: O projeto é organizado em camadas de responsabilidade (Api, Domain, Infrastructure), seguindo as melhores práticas de mercado.
+- Third-Party API Integration: Search for books by author and publication year in the Open Library.
+- Docker Database: Consistent and easy-to-configure development environment with SQL Server running in a Docker container.
+- Authentication and Authorization: Secure registration and login system with JSON Web Tokens (JWT). Protected endpoints that require authentication.
+- Full CRUD: Create, Read, Update, and Delete operations for authors saved in the database.
+- Pagination: Endpoints that return data lists are paginated to ensure API performance and scalability.
+- Clean Architecture: The project is organized into layers of responsibility (API, Domain, Infrastructure), following market best practices.
 
 
-## Tecnologias Utilizadas
+## Technologies Used
 - .NET 8 / ASP.NET Core Web API
 - Entity Framework Core 8
-- SQL Server (via Docker)
+- SQL Server (Docker)
 - Docker Compose
-- xUnit (para testes)
-- Moq (para mocks em testes)
-- BCrypt.Net-Next (para hashing de senhas)
+- BCrypt.Net-Next (for password hashing)
 
-## Pré-requisitos
-Antes de começar, garanta que você tem as seguintes ferramentas instaladas:
+## Prerequisites
+Before you begin, make sure you have the following tools installed:
 - .NET 8 SDK
 - Docker Desktop
 
 
-## Como Configurar e Rodar
-Siga estes passos para ter o projeto rodando localmente em poucos minutos.
+## How to Set Up and Run
+Follow these steps to have your project running locally in minutes.
 
-1. Clone o repositório:
+1. Clone the repository:
 ```bash
 git clone https://github.com/josiasdev/BookFinderApi
 cd BookFinderApi
 ```
 
-2. Verifique os Arquivos de Configuração:
-Os arquivos docker-compose.yml e BookFinder.Api/appsettings.json já estão pré-configurados. A senha padrão do banco de dados é BookFinder2509. Se desejar alterá-la, lembre-se de mudar nos dois arquivos:
-- docker-compose.yml: na variável de ambiente SA_PASSWORD.
-- BookFinder.Api/appsettings.json: na ConnectionString.
+2. Check the Configuration Files:
+The docker-compose.yml and BookFinder.Api/appsettings.json files are already pre-configured. The default database password is BookFinder2509. If you want to change it, remember to change it in both files:
+- docker-compose.yml: in the SA_PASSWORD environment variable.
+- BookFinder.Api/appsettings.json: in the ConnectionString.
 
-3. Inicie o Container do SQL Server:
-Este comando irá baixar a imagem do SQL Server (apenas na primeira vez) e iniciar o container em segundo plano.
+3. Start the SQL Server Container:
+This command will download the SQL Server image (first-time only) and start the container in the background.
 
 ```bash
 docker-compose up -d
 ```
-Aguarde cerca de 1 minuto para que o serviço do SQL Server dentro do container seja totalmente inicializado.
+Wait about 1 minute for the SQL Server service inside the container to fully initialize.
 
 
-4. Aplique as Migrations do Banco de Dados:
-Este comando criará o banco de dados BookFinderDB e todas as tabelas necessárias dentro do container.
+4. Apply Database Migrations:
+This command will create the BookFinderDB database and all necessary tables within the container.
 ```bash
 dotnet ef database update --startup-project BookFinder.Api
 ```
 
-5. Execute a API:
+5. Run the API:
 ```bash
 dotnet run --project BookFinder.Api/BookFinder.Api.csproj
 ```
 
-6. Acesse a Documentação e Teste:
-A API estará rodando. Acesse a documentação interativa do Swagger para testar todos os endpoints:
-- URL: https://localhost:PORTA/swagger (a porta geralmente é 7xxx, verifique o output do seu terminal).
+6. Access the Documentation and Test:
+The API will be running. Access the interactive Swagger documentation to test all endpoints:
+- URL: https://localhost:PORT/swagger (the port is usually 7xxx, check your terminal output).
 
 
-## Estrutura do Projeto
-O projeto utiliza uma arquitetura em camadas para separar as responsabilidades:
-- BookFinder.Domain: Contém as entidades do banco de dados (Author, Book, User) e os DTOs (Data Transfer Objects), que definem os "contratos" de dados da aplicação.
-- BookFinder.Infrastructure: Responsável pelo acesso a dados (DbContext) e pela comunicação com serviços externos (integração com a Open Library API, serviço de geração de token).
-- BookFinder.Api: A camada de apresentação. Contém os Controllers, que expõem os endpoints HTTP, e o ponto de entrada da aplicação (Program.cs).
-- BookFinder.Tests: Projeto de testes unitários.
+## Project Structure
+The project uses a layered architecture to separate responsibilities:
+- BookFinder.Domain: Contains the database entities (Author, Book, User) and the DTOs (Data Transfer Objects), which define the application's data "contracts."
+- BookFinder.Infrastructure: Responsible for data access (DbContext) and communication with external services (integration with the Open Library API, token generation service).
+- BookFinder.Api: The presentation layer. Contains the Controllers, which expose the HTTP endpoints, and the application entry point (Program.cs).
 
 ## Endpoints da API
 
 A seguir, uma lista dos principais endpoints disponíveis.
 
-| Método HTTP | Endpoint                               | Descrição                                                              | Requer Autenticação? |
-| :---------- | :------------------------------------- | :--------------------------------------------------------------------- | :------------------- |
-| `POST`      | `Auth/register`                   | Registra um novo usuário.                                              | Não                  |
-| `POST`      | `/Auth/login`                      | Autentica um usuário e retorna um token JWT.                           | Não                  |
-| `GET`       | `/Books`                           | Lista todos os autores salvos (paginado).                              | **Sim** |
-| `POST`      | `/Books/search-and-save/{authorName}`  | Busca um autor na Open Library e salva os dados.                       | **Sim** |
-| `GET`       | `/Books/author/{id}`               | Busca um autor específico pelo seu ID.                                 | **Sim** |
-| `PUT`       | `/Books/author/{id}`               | Atualiza o nome de um autor.                                           | **Sim** |
-| `DELETE`    | `/Books/author/{id}`               | Deleta um autor e seus livros.                                         | **Sim** |
-| `GET`       | `/Books/count`                     | Retorna a quantidade total de livros no banco.                         | **Sim** |
-| `GET`       | `/{year}`               | Busca livros na Open Library por ano de publicação (paginado).         | **Sim** |
+## API Endpoints
+
+Below is a list of the main available endpoints.
+
+| HTTP Method | Endpoint | Description | Requires Authentication? |
+| :---------- | :--------------------------------------- | :------------------------------------------------------ | :------------------- |
+| `POST` | `Auth/register` | Registers a new user. | No |
+| `POST` | `/Auth/login` | Authenticates a user and returns a JWT token. | No |
+| `GET` | `/Books` | Lists all saved authors (paginated). | **Yes** |
+| `POST` | `/Books/search-and-save/{authorName}` | Searches for an author in Open Library and saves the data. | **Yes** |
+| `GET` | `/Books/author/{id}` | Searches for a specific author by their ID. | **Yes** |
+| `PUT` | `/Books/author/{id}` | Updates an author's name. | **Yes** |
+| `DELETE` | `/Books/author/{id}` | Deletes an author and their books. | **Yes** |
+| `GET` | `/Books/count` | Returns the total number of books in the database. | **Yes** |
+| `GET` | `/{year}` | Searches for books in Open Library by publication year (paginated). | **Yes** |
 
 
-
-## Como Rodar os Testes
-Para executar a suíte de testes unitários, navegue até a pasta raiz da solução e execute o comando:
-
-```bash
-dotnet test
-```
-
-
-
-## Link da API de Terceiros
+## Third-Party API Link
 - API: Open Library API
-- Documentação: https://openlibrary.org/developers/api
+- Documentation: https://openlibrary.org/developers/api
